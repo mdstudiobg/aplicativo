@@ -1,0 +1,8 @@
+{
+  "name": "embrios_novo",
+  "app_id": "",
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
+}

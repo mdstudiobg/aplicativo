@@ -1,0 +1,251 @@
+<ion-header>
+  <ion-navbar >
+    
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+
+    <ion-title>Home</ion-title>
+
+    <ion-buttons end>
+      <button icon-only ion-button (click)="BuscarPage()"><ion-icon name="search"></ion-icon></button>
+    </ion-buttons>
+
+
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding >
+
+ 
+
+
+  <ion-card *ngIf="avisoLogin" style="margin-bottom:25px;">
+    <ion-card-content>
+    <p style="font-size:14px; padding-bottom:5px; padding-top:5px;">
+        Insira seu usuário e senha e tenha acesso a conteúdo exclusivo, veja sua agenda de compromissos, lembretes para tomar medicamentos, controle para gestantes, envie depoimentos e muito mais.
+      </p> 
+      <button ion-button   (click)="direcionaLogin()" >Fazer login</button>
+      <button ion-button outline  (click)="fechaAvisoLogin()" >Fechar aviso</button>
+    </ion-card-content>
+  </ion-card>
+
+
+
+    <ion-segment  class="SwipedTabs-tabs"  >
+        <ion-segment-button *ngFor='let tab of tabs ; let i = index ' value="IngoreMe" (click)="selectTab(i)"
+        [ngClass]='{ "SwipedTabs-activeTab" : ( this.SwipedTabsSlider  && ( this.SwipedTabsSlider.getActiveIndex() === i || (  tabs.length -1 === i && this.SwipedTabsSlider.isEnd()))) }' >
+          {{tab}}
+        </ion-segment-button>
+    </ion-segment>
+    
+      <!-- here is our dynamic line  "indicator"-->
+      <div id='indicator' class="SwipedTabs-indicatorSegment" [ngStyle]="{'width.%': (100/this.tabs.length)}"></div>
+    
+          <ion-slides 
+          style="height:auto;"
+          #SwipedTabsSlider  (ionSlideDrag)="animateIndicator($event)"
+          (ionSlideWillChange)="updateIndicatorPosition()"
+          (ionSlideDidChange)="updateIndicatorPosition()"
+          (pan)="updateIndicatorPosition()"
+          [pager]="false"
+          >
+              <ion-slide>
+    
+                <ion-refresher (ionRefresh)="getPosts($event)">
+                  <ion-refresher-content></ion-refresher-content>
+              </ion-refresher>
+
+                            <ion-row>
+                                <ion-item> 
+                                    <ion-label text-right></ion-label>
+                                      <ion-select [(ngModel)]="ordenar" (ionChange)="mudarOrdem()" cancelText="Cancelar" okText="OK">
+                                          <ion-option value="0">Recentes</ion-option>
+                                          <ion-option value="1">Mais antigos</ion-option>
+                                          <ion-option value="2">A ao Z</ion-option>
+                                          <ion-option value="3">Z ao A</ion-option>
+                                      </ion-select>
+                                  </ion-item>   
+                              </ion-row>
+                            
+
+                            
+                            
+                              <ion-card *ngFor="let item of items" (click)="openDetail(item)">
+                                  <img src="{{item._embedded['wp:featuredmedia'][0].media_details.sizes.medium.source_url}}"/>
+                            
+                                  <ion-card-content>
+                            
+                                    <ion-card-title>
+                                      {{item.title.rendered}}
+                                    </ion-card-title>
+                            
+                                    <ion-badge color="second">
+                                      {{item.excerpt.rendered}}
+                                    </ion-badge>
+                            
+                                    <ion-badge color="dark">
+                                      <ion-icon name="time"></ion-icon>
+                                      {{item.date | date: "dd.MM.yyy / hh:mm"}}
+                                    </ion-badge>
+                                      
+                                  </ion-card-content>
+                                </ion-card>
+                            
+                                <div *ngIf="isLoading && page==1" text-center padding><ion-spinner></ion-spinner></div>
+                            
+                                <ion-infinite-scroll (ionInfinite)="getPosts($event)">
+                                    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+                                  </ion-infinite-scroll>
+              </ion-slide>
+
+
+
+
+
+
+              <ion-slide  *ngIf="slideCalendario">
+
+                  
+
+                             <br> 
+                              <div *ngIf="calendarOptions" >
+                                <ng-fullcalendar #ucCalendar [options]="calendarOptions" [(eventsModel)]="events" style="    font-size: 14px;"></ng-fullcalendar>
+                              </div>
+  
+              </ion-slide>
+
+
+
+
+
+              <ion-slide  *ngIf="slideMedicacoes">
+
+                
+                <div *ngIf="conteudoNaoComecou"><br><br>Você não possui medicamentos agendados para hoje, confira novamente amanhã.</div>
+
+                <div *ngIf="conteudoMedicacoes">
+                    <p style="font-size:18px; padding:0px; text-align:center; color:#26b8b9;">Você está no <b>{{diaTratamento}}º</b> dia de tratamento, estes são os medicamentos para hoje.</p>
+                    <p style="font-size:14px; padding:0px; text-align:justify; color:#666;"> Você pode <b>ATIVAR NOTIFICAÇÕES</b> e ser avisado na hora em que precisa tomar/aplicar o medicamento. Se você já iniciou o tratamento, procure ativar as notificações exatamente na hora que tiver tomando/aplicando um dos medicamentos, assim o sistema vai avisar corretamente você o próximo horário.</p>
+            
+
+                    <ion-card *ngFor="let med of result" >
+                      <ion-card-content>
+                        <ion-card-header style="font-size:18px; padding-bottom:5px; padding-top:5px;  background-color:#26b8b9; color:#fff;">
+                             {{med.medicacaoAtiva}} | <b>{{med.quantidade}}</b> 
+
+                        </ion-card-header>
+                      <p style="font-size:14px; padding-bottom:5px; padding-top:5px;">
+                          <ion-icon name="alarm"></ion-icon>
+                          {{med.horaTomar}} em {{med.horaTomar}} horas
+                        </p> 
+                        <button ion-button outline  (click)="ativaNotificacao(med.medicacaoAtiva, med.quantidade, med.horaTomar)" >Ativar</button>
+                        <button ion-button  outline    (click)="desativaNotificacao(med.medicacaoAtiva, med.quantidade, med.horaTomar)" >Desativar</button>
+                      </ion-card-content>
+
+                     <button ion-button  outline  full style="border:0px;  " (click)="rodaVideoYoutube(med.medicacaoAtiva, med.quantidade, med.horaTomar)" ><ion-icon style="font-size: 35px;" name="logo-youtube">&nbsp;</ion-icon> Ver Instruções</button>
+
+                    </ion-card>
+                      <br>
+                      <hr>
+                </div>
+                
+                <p style="font-size:22px; padding:0px; text-align:center; color:#26b8b9;">Atenção</p>
+                <p style="font-size:14px; padding-top:-10px; padding-right:10px; padding-left:10px; text-align:justify; color:#666;"> Você não irá receber notificações se estiver off-line. Para não ter inconvenientes, após cada avaliação ecográfica na clínica, faça o download da sua ficha para ter controle sobre os medicamentos a serem utilizados. </p>
+                <button ion-button   (click)="baixarFicha()" >Baixar ficha completa</button>   
+                <br>
+              </ion-slide>
+
+
+
+              <ion-slide padding *ngIf="slideVideos"> 
+                  <h6> Ficaremos muito felizes em receber seu depoimento, comente abaixo um pouco de sua trajetória e experiência.  </h6>
+               
+                
+             
+                    <ion-item>
+                      <ion-input type="text" required [(ngModel)]="nomeMae" placeholder="Seu nome" ngControl="nomeMae"></ion-input>
+                    </ion-item>
+
+                    <ion-item>
+                      <ion-input type="text" required [(ngModel)]="conjuge" placeholder="Cônjuge" ngControl="conjuge"></ion-input>
+                    </ion-item>
+
+                    <ion-item>
+                        <ion-input type="text" required [(ngModel)]="nomeBebe" placeholder="Nome do seu bebê" ngControl="nomeBebe"></ion-input>
+                      </ion-item>
+
+                    <ion-item>
+                      <ion-textarea [(ngModel)]="mensagemMae" placeholder="Mensagem" maxlength="250" ngControl="mensagemMae" rows="4"></ion-textarea>
+                    </ion-item>
+
+                   <br>
+                    <button ion-button (click)="cropImage()"   style="padding-top:25px; padding-bottom:25px;">Selecione uma foto</button>
+                    <div align="center"><img src="{{ myphoto }}"></div>
+                    
+                
+                  
+                 <br>
+ 
+                      
+                        
+                 
+                        <ion-item >
+                          <ion-label>Autorização</ion-label>
+                          <ion-select [(ngModel)]="autoriza" class="form-checkbox-lg" ngControl="autoriza" (ionChange)="hide()">
+                            <ion-option value="sim">Sim</ion-option>
+                            <ion-option value="nao">Não</ion-option>
+                          </ion-select>
+                        </ion-item>
+                      
+                        <p style="color:#333; font-size:14px;">Você autoriza publicarmos seu depoimento em nosso site? Ele será exibido na página inicial na sessão "Sonhos realizados".</p>
+
+
+
+
+
+                     <br>
+                     <button *ngIf="hideMe" ion-button full (click)="uploadImage()" color="secondary" style="padding-top:25px; padding-bottom:25px;">Enviar</button>
+                     <p *ngIf="hideMe" style="color:#666; font-size:12px;">*Você só pode enviar um depoimento, se enviar outros, o antigo depoimento será substituido pelo atual.</p>
+              
+                    </ion-slide>
+
+
+
+
+              <ion-slide *ngIf="slideGestante"> 
+                <p style="font-size:18px; padding:0px; text-align:center; color:#26b8b9;">Abaixo estão algumas informações importantes para você, futura mamãe!</p>
+                     <ion-card *ngFor="let mae of gest" >
+                      <ion-card-content>
+                        <ion-card-header style="font-size:18px; padding-bottom:5px; padding-top:5px;  background-color:#26b8b9; color:#fff;">
+                              <ion-icon name="alarm"></ion-icon>  <b>{{mae.inicial_mais_semanas}}</b> 
+
+                        </ion-card-header>
+                      <p style="font-size:14px; padding-bottom:5px; padding-top:5px;">
+                        <b>{{mae.titulo}}</b><br>
+                          {{mae.mensagem}}
+                        </p> 
+
+                      </ion-card-content>
+
+                    </ion-card>
+                      <br>
+                      <hr>
+              </ion-slide>
+
+
+
+
+      </ion-slides>
+
+
+
+
+
+
+      
+
+  
+    
+
+</ion-content>

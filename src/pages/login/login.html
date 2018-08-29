@@ -1,0 +1,45 @@
+<ion-header>
+    <ion-navbar >
+      
+      <button ion-button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+  
+      <ion-title > Entre com sua conta </ion-title>
+       
+    </ion-navbar>
+  </ion-header>
+
+
+<ion-content padding>
+
+ 
+    <br>
+
+<ion-card *ngIf="jaLogado">
+    <ion-card-content>                      
+        <ion-card-header style="font-size:22px; padding-bottom:5px; padding-top:5px; text-align:center;">
+            Você já está logado! 
+        </ion-card-header >
+        <p style="font-size:14px; padding-bottom:5px; padding-top:5px; text-align:center;">Se desejar entrar com outro usuário, apenas preencha os dados abaixo:</p>
+        
+    </ion-card-content>
+</ion-card>
+
+
+    <h5 text-center *ngIf="msg_jaLogado">Insira seu usuario e senha para ter acesso ao calendário de suas consultas, medicamentos, vídeos e muito mais!</h5>
+      <ion-item padding>
+        
+        <ion-input placeholder="Usuário" [(ngModel)]="usuario" autocapitalize="off" autocomplete="false"></ion-input>
+      </ion-item>
+
+      <ion-item padding>
+        
+        <ion-input placeholder="Senha" [(ngModel)]="senha" autocapitalize="off" type="password" autocomplete="false"></ion-input>
+      </ion-item>
+
+      <div class="col" style="width: 100%; text-align: center">
+        <button ion-button (click)="postData()" padding style="padding:20px; background-color: #26b8b9; padding-right:25px; padding-left:25px;">LOGIN</button>
+      </div>
+
+</ion-content>

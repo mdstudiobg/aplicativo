@@ -1,0 +1,73 @@
+<ion-header>
+    <ion-navbar color="primary">
+      
+      <button ion-button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+  
+      <ion-title>{{post.title.rendered}}</ion-title>
+    </ion-navbar>
+  </ion-header>
+  
+  <ion-content>
+  
+      <img src="{{post._embedded['wp:featuredmedia'][0].media_details.sizes.full.source_url}}" alt=""/>
+
+      <div padding>
+        <h1>{{post.title.rendered}}</h1>
+        <ion-row>
+          
+
+            <ion-badge color="light">
+              <ion-icon name="time"></ion-icon>
+              {{post.date | date: "dd.MM.yyy / hh:mm"}}
+            </ion-badge>
+        </ion-row>
+        
+        <div [innerHtml]="post.content.rendered" style="font-size:15px;"></div>
+      </div>
+
+
+<hr>
+
+<div style="width:100%; text-align:center;">
+<ion-badge color="escuro" style="font-size:18px; text-align:center; width:90%; padding:10px;">
+  Postagens Relacionadas 
+</ion-badge>
+</div>
+      <div *ngIf="isLoading" text-center padding>
+        <ion-spinner></ion-spinner>
+      </div>
+
+      <div padding>
+        <ion-card *ngFor="let item of relatedItems" (click)="openDetail(item)">
+          <img src="{{item._embedded['wp:featuredmedia'][0].media_details.sizes.medium.source_url}}">
+          <ion-card-content>
+            <ion-card-title>
+              {{item.title.rendered}}
+            </ion-card-title>
+            <ion-row>
+              <ion-badge color="second">
+                {{item.excerpt.rendered}}
+              </ion-badge>
+              <ion-badge color="light">
+                <ion-icon name="time"></ion-icon>
+                {{item.date | date:"dd.MM.yyyy / hh:mm"}}
+              </ion-badge>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+
+
+ 
+      
+
+
+      
+  
+
+
+  </ion-content>
+  
